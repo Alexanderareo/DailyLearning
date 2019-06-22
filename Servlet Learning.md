@@ -84,3 +84,86 @@ PrintWriter out = response.getWriter();
 > 对于getParameterNames所产生的对象(Enumeration类型)，可用的方法有nextElement获取下一个元素
 
 ##### HTTP Request From Servlet Client 
+* 一些可用的方法
+> getAttributeName()
+> getParameterNames()
+> getSession() 返回session会话，有趣的feature可以研究一下
+> getContentType()
+> getContextPath() 获取上下文请求的URL部分
+> getmethod()
+> 
+
+##### Servlet Server Http Response
+* 一些对应的Set方法
+> 设定时间
+```java
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/Refresh")
+
+//扩展 HttpServlet 类
+public class Refresh extends HttpServlet {
+
+    // 处理 GET 方法请求的方法
+      public void doGet(HttpServletRequest request,
+                        HttpServletResponse response)
+                throws ServletException, IOException
+      {
+          // 设置刷新自动加载时间为 5 秒
+          response.setIntHeader("Refresh", 5);
+          // 设置响应内容类型
+          response.setContentType("text/html;charset=UTF-8");
+         
+          //使用默认时区和语言环境获得一个日历  
+          Calendar cale = Calendar.getInstance();  
+          //将Calendar类型转换成Date类型  
+          Date tasktime=cale.getTime();  
+          //设置日期输出的格式  
+          SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+          //格式化输出  
+          String nowTime = df.format(tasktime);
+          PrintWriter out = response.getWriter();
+          String title = "自动刷新 Header 设置 - 菜鸟教程实例";
+          String docType =
+          "<!DOCTYPE html>\n";
+          out.println(docType +
+            "<html>\n" +
+            "<head><title>" + title + "</title></head>\n"+
+            "<body bgcolor=\"#f0f0f0\">\n" +
+            "<h1 align=\"center\">" + title + "</h1>\n" +
+            "<p>当前时间是：" + nowTime + "</p>\n");
+      }
+      // 处理 POST 方法请求的方法
+      public void doPost(HttpServletRequest request,
+                         HttpServletResponse response)
+          throws ServletException, IOException {
+         doGet(request, response);
+      }
+}
+```
+
+##### HTTP Status Code
+* 设置
+```java
+public void setStatus ( int statusCode )
+public void sendRedirect(String url) //该方法生成一个 302 响应，连同一个带有新文档 URL 的 Location--->Redirect
+public void sendError(int code, String message)
+```
+
+##### Servlet Filter
+* Servlet 过滤器可以动态地拦截请求和响应，以变换或使用包含在请求或响应中的信息。
+* 可以将一个或多个 Servlet 过滤器附加到一个 Servlet 或一组 Servlet。Servlet 过滤器也可以附加到 JavaServer Pages (JSP) 文件和 HTML 页面。调用 Servlet 前调用所有附加的 Servlet 过滤器。
+> 在客户端的请求访问后端资源之前，拦截这些请求。
+> 在服务器的响应发送回客户端之前，处理这些响应。
+* 接口 javax.servlet.Filter
+> 方法 doFilter()   init()   destroy()
