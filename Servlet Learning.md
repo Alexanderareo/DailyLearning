@@ -166,4 +166,144 @@ public void sendError(int code, String message)
 > 在客户端的请求访问后端资源之前，拦截这些请求。
 > 在服务器的响应发送回客户端之前，处理这些响应。
 * 接口 javax.servlet.Filter
-> 方法 doFilter()   init()   destroy()
+> 方法 
+> > doFilter(); 该方法完成实际的过滤操作，当客户端请求方法与过滤器设置匹配的URL时，Servlet容器将先调用过滤器的doFilter方法。FilterChain用户访问后续过滤器。
+> > init(); web 应用程序启动时，web 服务器将创建Filter 的实例对象，并调用其init方法，读取web.xml配置，完成对象的初始化功能
+> > destroy(); 
+
+* 在web.xml中的配置如下
+```xml
+    <filter>
+    <filter-name>LogFilter</filter-name>
+    <filter-class>com.runoob.test.LogFilter</filter-class>
+    <init-param>
+        <param-name>Site</param-name>
+        <param-value>菜鸟教程</param-value>
+    </init-param>
+    </filter>
+```
+* web.xml配置各节点说明
+> <init-param>元素用于为过滤器指定初始化参数，它的子元素<param-name>指定参数的名字，<param-value>指定参数的值。
+> 
+
+##### 异常处理
+* 在xml文件中<error-page>是关键字
+* 如果想对所有的异常有通用的处理程序
+```xml
+<error-page>
+    <exception-type>java.lang.Throwable</exception-type >
+    <location>/ErrorHandler</location>
+</error-page>
+```
+
+##### Servlet and Cookie
+* What is cookie？
+> Cookie 是存储在客户端计算机上的文本文件，并保留了各种跟踪信息
+
+##### Servlet Session
+* Session 用于保持Web客户端和Web服务器间的Session会话
+
+* 一个 Web 服务器可以发送一个隐藏的 HTML 表单字段，以及一个唯一的 session 会话 ID
+```xml
+<input type="hidden" name="sessionid" value="12345">
+```
+* URL重写
+
+* HttpSession对象
+> Servlet提供了HttpSession接口，Servlet 容器使用这个接口来创建一个 HTTP 客户端和 HTTP 服务器之间的 session 会话。会话持续一个指定的时间段，跨多个连接或页面请求。
+```java
+HttpSession session = request.getSession();
+```
+* 同接受的表单信息一样，可以使用getAttribute()和setAttribute()方法
+* 添加xml只需要添加与之对应的servlet方法。
+
+##### servlet Database Connection
+* 首先需要声明JDBC驱动以及数据库URL
+```java
+// JDBC 驱动名及数据库 URL
+    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+    static final String DB_URL = "jdbc:mysql://localhost:3306/PROJECT_NAME";
+    // 数据库的用户名与密码，需要根据自己的设置
+    static final String USER = "root";
+    static final String PASS = "123456";
+    protected void deGet(HttpServletRequest request, HttpServletResponse response)throws ServletException,
+    IOException{
+        ......
+        Connection conn = null;
+        Statement stmt = null;
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt = conn.createStatement();
+            String sql;
+            sql = "  ";
+            ResultSet rs = stmt.executeQurery(sql);
+            while(rs.next()){
+                int id = rs.getString("name");
+                String url = rs.getString("url");
+                //这里的getString中的变量是数据库table中的关键字名
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+        }catch(SQLException se){
+            se.printStackTrace();
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally{
+            try{
+                if(stmt!=null)
+                    stmt.close();
+            }catch(SQLException se2){
+            }
+            try{
+                if(conn!=null)
+                conn.close();
+            }catch(SQLException se){
+                se.printStackTrace();
+            }
+        }
+    }
+```
+> 还有种方法是使用 PreparedStatement
+
+##### Servlet For File Uploading
+> Too long to cover.
+
+##### WebPage Redirect
+> The most simple method is to use sendRedirect() in response
+```java
+public void HttpServletResponse.sendRedirect(String location)throws IOException{
+}
+```
+> We can also use setStatus() and setHeader() together
+```java
+String site = "http://URL" ;
+response.setStatus(response.SC_MOVED_TEMPORARILY);
+response.setHeader("Location", site); 
+```
+> Actual Example
+```java
+@WebServlet("/PageRedirect")
+public class PageRedirect extends HttpServlet{
+    
+  public void doGet(HttpServletRequest request,
+                    HttpServletResponse response)
+            throws ServletException, IOException
+  {
+      // 设置响应内容类型
+      response.setContentType("text/html;charset=UTF-8");
+
+      // 要重定向的新位置
+      String site = new String("http://www.runoob.com");
+
+      response.setStatus(response.SC_MOVED_TEMPORARILY);
+      response.setHeader("Location", site);    
+    }
+} 
+```
+* 使用注释的WebServlet进行路由绑定的优先级高于web.xml进行绑定
+
+
